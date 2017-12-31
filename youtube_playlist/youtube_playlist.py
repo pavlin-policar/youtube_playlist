@@ -11,14 +11,6 @@ from youtube_dl.utils import sanitize_filename
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-PLAYLISTS = {
-    '2014': 'PLvExg6gsBjAccJ7o4HpDptNlsxDN27rCL',
-    'classical': 'PLvExg6gsBjAd-Z_iHGKGc3hWnhrDf7qDZ',
-    'sad_piano': 'PLh9R0KdDnt85ganQeuun2ceutPqvCbxrw',
-    'old': 'PLCA48A738B499BE6D',
-}
-PLAYLISTS_DIR = join('~', 'Music')
-
 
 def _print_progress(current_idx, total_songs, song_title):
     # Clear the line from the previous download
@@ -189,17 +181,16 @@ class Playlist:
         }
 
     @classmethod
-    def from_title(cls, playlist_name, directory, ytl):
+    def from_id(cls, playlist_id, directory, ytl):
         # type: (str, str, YoutubeDL) -> Playlist
         """Create playlist instance from the given playlist name."""
         ie = ytl.get_info_extractor('YoutubePlaylist')
-        playlist_url = PLAYLISTS[playlist_name]
 
-        assert ie.suitable(playlist_url), \
+        assert ie.suitable(playlist_id), \
             'The info extractor is not suitable for the given URL. Are you ' \
             'sure you provided a valid playlist id?'
 
-        playlist_info = ie.extract(playlist_url)
+        playlist_info = ie.extract(playlist_id)
         playlist_info['entries'] = list(playlist_info['entries'])
 
         return cls(playlist_info, directory, ytl)

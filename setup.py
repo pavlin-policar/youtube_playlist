@@ -14,6 +14,7 @@ setup(
     url='https://github.com/pavlin-policar/youtube_playlist',
     install_requires=[
         'youtube-dl==2017.12.23',
+        'pyyaml',
     ],
     entry_points={
         'console_scripts': [
