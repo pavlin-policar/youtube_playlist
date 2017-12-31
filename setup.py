@@ -15,6 +15,7 @@ setup(
     install_requires=[
         'youtube-dl==2017.12.23',
         'pyyaml',
+        'notify2',
     ],
     entry_points={
         'console_scripts': [

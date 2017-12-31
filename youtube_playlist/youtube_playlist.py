@@ -5,8 +5,11 @@ import sys
 from os.path import join, exists, basename
 from typing import Dict
 
+import notify2 as notify
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import sanitize_filename
+
+notify.init('Youtube Playlist')
 
 
 def _print_progress(current_idx, total_songs, song_title):
@@ -116,7 +119,8 @@ class Playlist:
                 non_tracked_songs.append(file)
 
         if len(non_tracked_songs) > 0:
-            print('Number of songs not being tracked: %d' % len(non_tracked_songs))
+            print('Number of songs not being tracked: %d' % len(
+                non_tracked_songs))
 
         return non_tracked_songs
 
@@ -137,14 +141,30 @@ class Playlist:
 
     def sync(self):
         if len(self.to_remove):
-            print('Deleting removed songs from local file system.')
+            print('Deleting removed tracks from local file system.')
             self._remove_songs()
             print('\n')
 
         if len(self.to_download):
-            print('Downloading added songs to local file system.')
+            print('Downloading added tracks to local file system.')
             self._download_songs()
             print('\n')
+
+        # Show a notification if anything was done
+        if len(self.to_remove) or len(self.to_download):
+            notify_message = 'Synchronization complete. Playlist contains %d ' \
+                             'tracks.\n' % len(self._local_data)
+            if len(self.to_remove):
+                notify_message += 'Removed %d tracks.\n' % len(self.to_remove)
+            if len(self.to_download):
+                notify_message += 'Downloaded %d tracks\n' % len(
+                    self.to_download)
+            notification = notify.Notification(
+                summary='%s Sync Complete' % self.name,
+                message=notify_message,
+            )
+            notification.set_urgency(notify.URGENCY_LOW)
+            notification.show()
 
     def _remove_songs(self):
         for idx, song in enumerate(self.to_remove):
