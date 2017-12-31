@@ -1,10 +1,8 @@
-#!/usr/bin/python
 import logging
 import os
 import pickle
 import sys
-from argparse import ArgumentParser
-from os.path import join, isdir, expanduser, exists, basename
+from os.path import join, exists, basename
 from typing import Dict
 
 from youtube_dl import YoutubeDL
@@ -42,7 +40,8 @@ def _print_progress(current_idx, total_songs, song_title):
 class Playlist:
     DATA_FILE_NAME = 'data.p'
 
-    def __init__(self, playlist_info: Dict, directory: str, ytl: YoutubeDL):
+    def __init__(self, playlist_info, directory, ytl):
+        # type: (Dict, str, YoutubeDL) -> None
         self.id = playlist_info['id']
         self.name = playlist_info['title']
         self.uploader = playlist_info['uploader']
@@ -190,7 +189,8 @@ class Playlist:
         }
 
     @classmethod
-    def from_title(cls, playlist_name: str, directory: str, ytl: YoutubeDL):
+    def from_title(cls, playlist_name, directory, ytl):
+        # type: (str, str, YoutubeDL) -> Playlist
         """Create playlist instance from the given playlist name."""
         ie = ytl.get_info_extractor('YoutubePlaylist')
         playlist_url = PLAYLISTS[playlist_name]
@@ -206,7 +206,8 @@ class Playlist:
 
 
 class Song:
-    def __init__(self, song_info: Dict, ytl: YoutubeDL, playlist: Playlist):
+    def __init__(self, song_info, ytl, playlist):
+        # type: (Dict, YoutubeDL, Playlist) -> None
         self.id = song_info['id']
         self.title = sanitize_filename(song_info['title'])
         self.url = song_info['url']
@@ -242,57 +243,3 @@ def check(playlist):
     print('Songs to remove: %d' % len(playlist.to_remove))
     print('Songs to download: %d' % len(playlist.to_download))
     print('Untracked songs: %d' % len(playlist.non_tracked_songs))
-
-
-ACTIONS = {
-    'sync': lambda playlist: playlist.sync(),
-    'check': check,
-}
-
-
-def __parse_arguments():
-    parser = ArgumentParser(
-        description='Keep your local music playlist synchronized with your '
-                    'youtube playlists.',
-    )
-    parser.add_argument(
-        'action', metavar='action', type=str, choices=ACTIONS.keys(),
-        help='action to perform',
-    )
-    parser.add_argument(
-        'name', metavar='name', type=str, choices=PLAYLISTS.keys(),
-        help='playlist name',
-    )
-    parser.add_argument(
-        '--dir', default=PLAYLISTS_DIR,
-        help='specify the directory where playlists are located'
-    )
-    args = parser.parse_args()
-
-    # Convert the ~ to the user path, so that `isdir` works properly
-    args.dir = expanduser(args.dir)
-    assert isdir(args.dir), 'The path specified is not a valid directory!'
-
-    return args
-
-
-def __main():
-    args = __parse_arguments()
-
-    ytl = YoutubeDL({
-        'quiet': True,
-        'no_warnings': True,
-        'outtmpl': join(args.dir, '%(playlist)s/%(title)s.%(ext)s'),
-        'nooverwrites': True,
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-        }]
-    })
-
-    playlist = Playlist.from_title(args.name, args.dir, ytl)
-    ACTIONS[args.action](playlist)
-
-
-if __name__ == '__main__':
-    __main()
