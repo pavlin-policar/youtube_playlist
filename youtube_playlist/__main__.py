@@ -1,3 +1,4 @@
+import logging
 import os
 from argparse import ArgumentParser
 from os import path
@@ -55,7 +56,19 @@ def __parse_arguments():
         '--dir', default=config['directory'],
         help='specify the directory where playlists are located'
     )
+    parser.add_argument(
+        '--log', default='critical', help='Log level',
+        choices=['debug', 'info', 'warning', 'error', 'critical'],
+    )
     args = parser.parse_args()
+
+    logging.basicConfig(level={
+        'debug': logging.DEBUG,
+        'info': logging.INFO,
+        'warning': logging.WARNING,
+        'error': logging.ERROR,
+        'critical': logging.CRITICAL,
+    }[args.log])
 
     # Convert the ~ to the user path, so that `isdir` works properly
     args.dir = expanduser(args.dir)

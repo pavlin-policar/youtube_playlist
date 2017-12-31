@@ -20,17 +20,18 @@ youtube-playlist [options] <action> <playlist_name>
 
 ```
 Actions:
-  sync        Synchronize the playlist, download any newly added songs and
-              remove any removed songs.
-  check       Provides a short summary of the synchronization status.
+  sync         Synchronize the playlist, download any newly added songs and
+               remove any removed songs.
+  check        Provides a short summary of the synchronization status.
 
 Playlist_name:
-  name        A playlist name must be provided. The playlist names must be
-              specified in the config file.
+  name         A playlist name must be provided. The playlist names must be
+               specified in the config file.
 
 optional arguments:
-  -h, --help  Show this help message and exit
-  --dir DIR   Specify the directory where playlists are located
+  -h, --help   Show this help message and exit
+  --dir DIR    Specify the directory where playlists are located
+  --log LEVEL  Specify log level
 ```
 
 ## Configuration

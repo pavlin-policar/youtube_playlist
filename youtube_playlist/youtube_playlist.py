@@ -8,9 +8,6 @@ from typing import Dict
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import sanitize_filename
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
-
 
 def _print_progress(current_idx, total_songs, song_title):
     # Clear the line from the previous download
@@ -71,16 +68,16 @@ class Playlist:
             assert loaded_data['name'] == self.name
 
         except FileNotFoundError:
-            logger.info('Data file not found. Assume empty local data.')
+            logging.info('Data file not found. Assume empty local data.')
 
         # If the data is corrupt, there's nothing we can do, so remove it
         except (EOFError, TypeError):
-            logger.warning('Unable to read data file. Removing...')
+            logging.warning('Unable to read data file. Removing...')
             os.remove(self.data_file)
 
         except AssertionError:
-            logger.warning('The data file contains data for different '
-                           'playlist. Removing...')
+            logging.warning('The data file contains data for different '
+                            'playlist. Removing...')
             os.remove(self.data_file)
 
         # Process the local data file and set up the `local_data`
@@ -94,8 +91,8 @@ class Playlist:
                 if exists(song.file_path):
                     local_data[song_id] = song
                 else:
-                    logger.info('%s found in data file, but not on disk. '
-                                'Removing from data...' % song.title)
+                    logging.info('%s found in data file, but not on disk. '
+                                 'Removing from data...' % song.title)
 
         # `loaded_data` only exists when parsing the data file succeeded. This
         # is in a separate try/except to make logging simpler.
@@ -160,8 +157,8 @@ class Playlist:
 
             # Perform download if necessary
             if exists(song.file_path):
-                logger.info('%s was not found in data file, but already '
-                            'existed on file system. Skipping download')
+                logging.info('%s was not found in data file, but already '
+                             'existed on file system. Skipping download')
             else:
                 song.download()
 
