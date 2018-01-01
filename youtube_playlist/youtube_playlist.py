@@ -94,11 +94,15 @@ class Playlist:
 
         # Process the local data file and set up the `local_data`
         try:
-            normalize = partial(unicodedata.normalize, 'NFC')
-            all_files = os.listdir(self.directory)
-            normalized_files = filter(lambda f: '.mp3' in f, all_files)
-            normalized_files = list(map(normalize, normalized_files))
-            normalized_files_set = set(normalized_files)
+            if exists(self.directory):
+                normalize = partial(unicodedata.normalize, 'NFC')
+                all_files = os.listdir(self.directory)
+                normalized_files = filter(lambda f: '.mp3' in f, all_files)
+                normalized_files = list(map(normalize, normalized_files))
+                normalized_files_set = set(normalized_files)
+            else:
+                all_files = normalized_files = []
+                normalized_files_set = set()
 
             for song_id in loaded_data['songs']:
                 song = Song.from_info(
@@ -136,17 +140,19 @@ class Playlist:
 
     def __check_for_non_tracked_songs(self):
         """List all mp3 files that are not being tracked."""
-        all_files = os.listdir(self.directory)
-        all_files = filter(lambda f: '.mp3' in f, all_files)
-
-        tracked_songs = {
-            basename(song.file_path) for song in self._local_data.values()
-        }
         non_tracked_songs = []
 
-        for file in all_files:
-            if file not in tracked_songs:
-                non_tracked_songs.append(file)
+        if exists(self.directory):
+            all_files = os.listdir(self.directory)
+            all_files = filter(lambda f: '.mp3' in f, all_files)
+
+            tracked_songs = {
+                basename(song.file_path) for song in self._local_data.values()
+            }
+
+            for file in all_files:
+                if file not in tracked_songs:
+                    non_tracked_songs.append(file)
 
         return non_tracked_songs
 
