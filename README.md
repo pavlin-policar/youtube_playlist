@@ -12,6 +12,8 @@ If you're like me, you keep your music playlists on Youtube, since it's very eas
 
 This is a thin wrapper around [youtube-dl](https://github.com/rg3/youtube-dl/) that keeps track of already downloaded songs and syncs them with the ones in your playlists.
 
+With every synchronization, `youtube-playlist` will check for any songs you may have added to your playlist on youtube, and download them. It will also check for any songs you may have removed online and also remove them from the directory. You can also place your own songs into the playlist directory and the script will not touch them. They will be "non-tracked". You can also remove all the non-tracked files from the directory with the `remove-untracked` command.
+
 ```
 youtube-playlist [options] <action> <playlist_name>
 ```
