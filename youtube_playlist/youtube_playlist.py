@@ -7,7 +7,7 @@ from typing import Dict
 
 import notify2 as notify
 from youtube_dl import YoutubeDL
-from youtube_dl.utils import sanitize_filename
+from youtube_dl.utils import sanitize_filename, ExtractorError
 
 notify.init('Youtube Playlist')
 
@@ -26,6 +26,13 @@ def _print_progress(current_idx, total_songs, song_title):
     sys.stdout.write(
         '\r[%3d/%3d] %s' % (current_idx, total_songs, song_title)
     )
+    sys.stdout.flush()
+
+
+def _print_message(message):
+    sys.stdout.write('\r' + ' ' * 80)
+    sys.stdout.flush()
+    sys.stdout.write('\r%s\n' % message)
     sys.stdout.flush()
 
 
@@ -90,8 +97,9 @@ class Playlist:
                     loaded_data['songs'][song_id], self.__ytl, playlist=self
                 )
                 # Check if the song actually exists on the file system, if it
-                # does, add it to the local data
-                if exists(song.file_path):
+                # does, add it to the local data. Also keep the song in local
+                # data if it has been copyrighted
+                if exists(song.file_path) or song.copyrighted:
                     local_data[song_id] = song
                 else:
                     logging.info('%s found in data file, but not on disk. '
@@ -122,8 +130,17 @@ class Playlist:
 
     @property
     def synced(self):
+        """Synced tracks include all tracks that have been downloaded."""
         return [self._local_data[song_id] for song_id in self._local_data
-                if song_id in self.__synced_song_ids]
+                if song_id in self.__synced_song_ids and
+                not self._local_data[song_id].copyrighted]
+
+    @property
+    def copyrighted(self):
+        """Copyrighted tracks have been synced, but can't be downloaded."""
+        return [self._local_data[song_id] for song_id in self._local_data
+                if song_id in self.__synced_song_ids and
+                self._local_data[song_id].copyrighted]
 
     @property
     def to_remove(self):
@@ -176,7 +193,18 @@ class Playlist:
                 logging.info('%s was not found in data file, but already '
                              'existed on file system. Skipping download')
             else:
-                song.download()
+                try:
+                    song.download()
+                except ExtractorError as e:
+                    if 'copyright grounds' in str(e):
+                        song.copyrighted = True
+                        _print_message(
+                            'Unable to download `%s` due to copyright '
+                            'restrictions' % song.title
+                        )
+                    # If we don't know why it failed, better to throw again
+                    else:
+                        raise e
 
             self._local_data[song.id] = song
 
@@ -217,6 +245,7 @@ class Song:
         self.url = song_info['url']
         self.playlist = playlist
         self.file_path = join(playlist.directory, '%s.mp3' % self.title)
+        self.copyrighted = song_info.get('copyright', False)
 
         self.__data = song_info
         self.__ytl = ytl
@@ -234,7 +263,12 @@ class Song:
         self.__ytl.process_video_result(ie_result, download=True)
 
     def info(self):
-        return {'id': self.id, 'title': self.title, 'url': self.url}
+        return {
+            'id': self.id,
+            'title': self.title,
+            'url': self.url,
+            'copyright': self.copyrighted,
+        }
 
     @classmethod
     def from_info(cls, info: Dict, ytl: YoutubeDL, playlist: Playlist = None):
