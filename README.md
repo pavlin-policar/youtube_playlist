@@ -39,9 +39,11 @@ The configuration file contains the required data to sync your playlists.
 
 Example:
 ```yaml
+# Specify the location where the playlists will be stored
 directory: ~/Music
+# Specify the playlists you want to keep track of here
 playlists:
-  # name: playlist_id
+  # <playlist_name>: <playlist_id>
   # The playlist id can be found on the playlist webpage e.g. Youtube Weekly Top 50
   # https://www.youtube.com/playlist?list=PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG
   weekly-50: PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG
@@ -52,3 +54,4 @@ The configuration file must be named `.youtube-playlist.yaml` and can is searche
 ## Notes
 - The playlist must be a public playlist.
 - You can add your own audio files to the folder. They will be registered as non tracked files and will not be touched.
+- Some tracks are copyright protected, and therefore, cannot be downloaded. The script will notify you of such a track, and a full list of these tracks can be obtained with `youtube-playlist check <playlist_name>`.
