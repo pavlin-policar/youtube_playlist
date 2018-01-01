@@ -2,10 +2,12 @@ import logging
 import os
 import pickle
 import sys
-from os.path import join, exists, basename
+from functools import partial
+from os.path import join, exists, basename, dirname
 from typing import Dict
 
 import notify2 as notify
+import unicodedata
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import sanitize_filename, ExtractorError
 
@@ -92,15 +94,35 @@ class Playlist:
 
         # Process the local data file and set up the `local_data`
         try:
+            normalize = partial(unicodedata.normalize, 'NFC')
+            all_files = os.listdir(self.directory)
+            normalized_files = filter(lambda f: '.mp3' in f, all_files)
+            normalized_files = list(map(normalize, normalized_files))
+            normalized_files_set = set(normalized_files)
+
             for song_id in loaded_data['songs']:
                 song = Song.from_info(
                     loaded_data['songs'][song_id], self.__ytl, playlist=self
                 )
+
                 # Check if the song actually exists on the file system, if it
                 # does, add it to the local data. Also keep the song in local
                 # data if it has been copyrighted
                 if exists(song.file_path) or song.copyrighted:
                     local_data[song_id] = song
+                # Some tracks contain special characters in their titles, and
+                # are written to disk differently, therefore we normalize them
+                # first, then compare
+                elif normalize(basename(song.file_path)) in normalized_files_set:
+                    song_dir = dirname(song.file_path)
+                    song.file_path = join(
+                        song_dir,
+                        all_files[normalized_files.index(
+                            normalize(basename(song.file_path)))]
+                    )
+                    local_data[song_id] = song
+                    logging.info('Track `%s` was matched with utf decoded '
+                                 'filename' % song.title)
                 else:
                     logging.info('%s found in data file, but not on disk. '
                                  'Removing from data...' % song.title)
@@ -193,7 +215,8 @@ class Playlist:
                 _print_message('`%s` already exists. Skipping download.' %
                                song.title)
                 logging.info('%s was not found in data file, but already '
-                             'existed on file system. Skipping download')
+                             'existed on file system. Skipping download' %
+                             song.title)
             else:
                 try:
                     song.download()
