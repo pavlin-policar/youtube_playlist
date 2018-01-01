@@ -57,7 +57,7 @@ def __parse_arguments():
         help='specify the directory where playlists are located'
     )
     parser.add_argument(
-        '--log', default='critical', help='Log level',
+        '-l', '--log', default='critical', help='Log level',
         choices=['debug', 'info', 'warning', 'error', 'critical'],
     )
     args = parser.parse_args()

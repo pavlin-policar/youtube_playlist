@@ -165,12 +165,12 @@ class Playlist:
 
         # Show a notification if anything was done
         if len(self.to_remove) or len(self.to_download):
-            notify_message = 'Synchronization complete. Playlist contains %d ' \
-                             'tracks.\n' % len(self._local_data)
+            notify_message = 'Synchronization complete. Playlist contains ' \
+                             '%d tracks.\n' % len(self._local_data)
             if len(self.to_remove):
                 notify_message += 'Removed %d tracks.\n' % len(self.to_remove)
             if len(self.to_download):
-                notify_message += 'Downloaded %d tracks\n' % len(
+                notify_message += 'Downloaded %d tracks.\n' % len(
                     self.to_download)
             notification = notify.Notification(
                 summary='%s Sync Complete' % self.name,
@@ -190,6 +190,8 @@ class Playlist:
 
             # Perform download if necessary
             if exists(song.file_path):
+                _print_message('`%s` already exists. Skipping download.' %
+                               song.title)
                 logging.info('%s was not found in data file, but already '
                              'existed on file system. Skipping download')
             else:
@@ -292,6 +294,6 @@ def check(playlist):
     for file_name in playlist.non_tracked_songs:
         print('\t%s' % file_name)
 
-    print('Copyrighted songs: %d' % len(playlist.copyrighted))
+    print('Copyrighted songs: %d (not downloaded)' % len(playlist.copyrighted))
     for song in playlist.copyrighted:
         print('\t%s' % song.title)
