@@ -7,7 +7,7 @@ from os.path import expanduser, isdir, join
 import yaml
 from youtube_dl import YoutubeDL
 
-from youtube_playlist.youtube_playlist import Playlist, check
+from youtube_playlist.youtube_playlist import Playlist, check, remove_untracked
 
 # Specify the default config
 config = {'playlists': {}, 'directory': join('~', 'Music')}
@@ -36,6 +36,7 @@ for playlist_name in config['playlists'].keys():
 ACTIONS = {
     'sync': lambda playlist: playlist.sync(),
     'check': check,
+    'remove-untracked': remove_untracked,
 }
 
 

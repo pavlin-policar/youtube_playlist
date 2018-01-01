@@ -38,6 +38,14 @@ def _print_message(message):
     sys.stdout.flush()
 
 
+def _send_notification(title, message):
+    # type: (str, str) -> None
+    """Send a system notification."""
+    notification = notify.Notification(summary=title, message=message)
+    notification.set_urgency(notify.URGENCY_LOW)
+    notification.show()
+
+
 class Playlist:
     DATA_FILE_NAME = 'data.p'
 
@@ -57,7 +65,7 @@ class Playlist:
         self.__ytl = ytl
 
         self._local_data = self.__get_local_data()
-        self.non_tracked_songs = self.__check_for_non_tracked_songs()
+        self.non_tracked_songs = self.get_non_tracked_songs()
 
         self.__local_ids = set(self._local_data.keys())
         self.__upstream_ids = set(self._upstream_data.keys())
@@ -138,7 +146,7 @@ class Playlist:
 
         return local_data
 
-    def __check_for_non_tracked_songs(self):
+    def get_non_tracked_songs(self):
         """List all mp3 files that are not being tracked."""
         non_tracked_songs = []
 
@@ -155,6 +163,9 @@ class Playlist:
                     non_tracked_songs.append(file)
 
         return non_tracked_songs
+
+    def update_non_tracked_songs(self):
+        self.non_tracked_songs = self.get_non_tracked_songs()
 
     @property
     def synced(self):
@@ -200,12 +211,7 @@ class Playlist:
             if len(self.to_download):
                 notify_message += 'Downloaded %d tracks.\n' % len(
                     self.to_download)
-            notification = notify.Notification(
-                summary='%s Sync Complete' % self.name,
-                message=notify_message,
-            )
-            notification.set_urgency(notify.URGENCY_LOW)
-            notification.show()
+            _send_notification('%s Sync Complete' % self.name, notify_message)
 
     def _remove_songs(self):
         for idx, song in enumerate(self.to_remove):
@@ -326,3 +332,20 @@ def check(playlist):
     print('Copyrighted songs: %d (not downloaded)' % len(playlist.copyrighted))
     for song in playlist.copyrighted:
         print('  - %s' % song.title)
+
+
+def remove_untracked(playlist):
+    # type: (Playlist) -> None
+    """Remove all tracks which are not tracked."""
+    num_non_tracked = len(playlist.non_tracked_songs)
+
+    for idx, song in enumerate(playlist.non_tracked_songs):
+        os.remove(join(playlist.directory, song))
+        _print_progress('Removed %d/%d untracked files' % (idx, num_non_tracked))
+
+    playlist.update_non_tracked_songs()
+    if num_non_tracked:
+        _send_notification('Finished removing untracked', '%d tracks removed'
+                           % num_non_tracked)
+    else:
+        _print_message('Nothing to do.')
