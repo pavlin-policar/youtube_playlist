@@ -307,16 +307,16 @@ def check(playlist):
 
     print('Songs to remove: %d' % len(playlist.to_remove))
     for song in playlist.to_remove:
-        print('\t%s' % song.title)
+        print('  - %s' % song.title)
 
     print('Songs to download: %d' % len(playlist.to_download))
     for song in playlist.to_download:
-        print('\t%s' % song.title)
+        print('  - %s' % song.title)
 
     print('Untracked songs: %d' % len(playlist.non_tracked_songs))
     for file_name in playlist.non_tracked_songs:
-        print('\t%s' % file_name)
+        print('  - %s' % file_name)
 
     print('Copyrighted songs: %d (not downloaded)' % len(playlist.copyrighted))
     for song in playlist.copyrighted:
-        print('\t%s' % song.title)
+        print('  - %s' % song.title)
