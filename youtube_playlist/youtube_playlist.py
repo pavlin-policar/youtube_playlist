@@ -118,10 +118,6 @@ class Playlist:
             if file not in tracked_songs:
                 non_tracked_songs.append(file)
 
-        if len(non_tracked_songs) > 0:
-            print('Number of songs not being tracked: %d' % len(
-                non_tracked_songs))
-
         return non_tracked_songs
 
     @property
@@ -247,7 +243,21 @@ class Song:
 
 def check(playlist):
     print('%s by %s' % (playlist.name, playlist.uploader))
+    print('-' * 80)
     print('Synced songs: %d' % len(playlist.synced))
+
     print('Songs to remove: %d' % len(playlist.to_remove))
+    for song in playlist.to_remove:
+        print('\t%s' % song.title)
+
     print('Songs to download: %d' % len(playlist.to_download))
+    for song in playlist.to_download:
+        print('\t%s' % song.title)
+
     print('Untracked songs: %d' % len(playlist.non_tracked_songs))
+    for file_name in playlist.non_tracked_songs:
+        print('\t%s' % file_name)
+
+    print('Copyrighted songs: %d' % len(playlist.copyrighted))
+    for song in playlist.copyrighted:
+        print('\t%s' % song.title)
