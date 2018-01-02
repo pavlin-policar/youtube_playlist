@@ -4,14 +4,20 @@ import pickle
 import sys
 from functools import partial
 from os.path import join, exists, basename, dirname
-from typing import Dict
+try:
+    from typing import Dict
+except:
+    pass
 
-import notify2 as notify
+try:
+    import notify2 as notify
+    notify.init('Youtube Playlist')
+except:
+    pass
+
 import unicodedata
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import sanitize_filename, ExtractorError
-
-notify.init('Youtube Playlist')
 
 
 def _print_progress(current_idx, total_songs, song_title):
@@ -41,9 +47,12 @@ def _print_message(message):
 def _send_notification(title, message):
     # type: (str, str) -> None
     """Send a system notification."""
-    notification = notify.Notification(summary=title, message=message)
-    notification.set_urgency(notify.URGENCY_LOW)
-    notification.show()
+    try:
+        notification = notify.Notification(summary=title, message=message)
+        notification.set_urgency(notify.URGENCY_LOW)
+        notification.show()
+    except:
+        pass
 
 
 class Playlist:
@@ -308,7 +317,8 @@ class Song:
         }
 
     @classmethod
-    def from_info(cls, info: Dict, ytl: YoutubeDL, playlist: Playlist = None):
+    def from_info(cls, info, ytl, playlist=None):
+        # type: (Dict, YoutubeDL, Playlist) -> Song
         return cls(info, ytl, playlist)
 
 
