@@ -15,7 +15,7 @@ This is a thin wrapper around [youtube-dl](https://github.com/rg3/youtube-dl/) t
 With every synchronization, `youtube-playlist` will check for any songs you may have added to your playlist on youtube, and download them. It will also check for any songs you may have removed online and also remove them from the directory. You can also place your own songs into the playlist directory and the script will not touch them. They will be "non-tracked". You can also remove all the non-tracked files from the directory with the `remove-untracked` command.
 
 ```
-youtube-playlist [options] <action> <playlist_name>
+youtube-playlist [optional] <action> <playlist_name>
 ```
 
 ## Options
@@ -31,13 +31,13 @@ Actions:
                         not being tracked.
 
 Playlist_name:
-  name         A playlist name must be provided. The playlist names must be
-               specified in the config file.
+  name                  A playlist name must be provided. The playlist names must be
+                        specified in the config file.
 
 optional arguments:
-  -h, --help   Show this help message and exit
-  --dir DIR    Specify the directory where playlists are located
-  --log LEVEL  Specify log level
+  -h, --help            Show this help message and exit
+  --dir DIR             Specify the directory where playlists are located
+  --log LEVEL           Specify log level
 ```
 
 ## Configuration
