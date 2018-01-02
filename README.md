@@ -24,11 +24,17 @@ youtube-playlist [optional] <action> <playlist_name>
 Actions:
   sync                  Synchronize the playlist, download any newly added songs and
                         remove any removed songs.
-                        
+
   check                 Provides a short summary of the synchronization status.
-  
+
   remove-untracked      Removes all the files in the playlist directory that are
                         not being tracked.
+
+  needs-sync            Prints out the number of songs that are out of sync with the
+                        playlist.
+
+  needs-download        Prints out the number of songs that need to be downloaded to
+                        sync the playlist.
 
 Playlist_name:
   name                  A playlist name must be provided. The playlist names must be

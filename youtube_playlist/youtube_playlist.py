@@ -349,3 +349,14 @@ def remove_untracked(playlist):
                            % num_non_tracked)
     else:
         _print_message('Nothing to do.')
+
+
+def needs_sync(playlist):
+    # type: (Playlist) -> None
+    return print(len(playlist.to_download) + len(playlist.to_remove))
+
+
+def needs_download(playlist):
+    # type: (Playlist) -> None
+    return print(len(playlist.to_download))
+
